@@ -6,7 +6,7 @@
 /*   By: ycanga <ycanga@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/04/21 11:38:18 by ycanga            #+#    #+#             */
-/*   Updated: 2022/04/21 13:16:54 by ycanga           ###   ########.fr       */
+/*   Updated: 2022/05/13 14:20:16 by ycanga           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -57,7 +57,7 @@ int	main(void)
 	int		i;
 	int		fd1;
     
-	fd1 = open("tests/deneme.txt",  O_RDONLY);
+	fd1 = open("tests/test.txt",  O_RDONLY);
 	
 	i = 1;
 

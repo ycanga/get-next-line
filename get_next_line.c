@@ -5,73 +5,149 @@
 /*                                                    +:+ +:+         +:+     */
 /*   By: ycanga <ycanga@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2022/04/21 11:38:18 by ycanga            #+#    #+#             */
-/*   Updated: 2022/05/13 14:20:16 by ycanga           ###   ########.fr       */
+/*   Created: 2022/01/15 18:24:32 by egun              #+#    #+#             */
+/*   Updated: 2022/08/25 00:44:32 by ycanga           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "get_next_line.h"
 
-char	*ft_read_to_left_str(int fd, char *left_str)
+int	check_error(int a, char *str, char *buffer)
 {
-	char	*buff;
-	int		rd_bytes;
-
-	buff = malloc(sizeof(char)*(BUFFER_SIZE + 1));
-	if (!buff)
-		return (NULL);
-	rd_bytes = 1;
-	while (!ft_strchr(left_str, '\n') && rd_bytes != 0)
+	if (a < 0)
 	{
-		rd_bytes = read(fd, buff, BUFFER_SIZE);
-		if (rd_bytes == -1)
-		{
-			free(buff);
-			return (NULL);
-		}
-		buff[rd_bytes] = '\0';
-		left_str = ft_strjoin(left_str, buff);
+		free (str);
+		free (buffer);
+		return (0);
 	}
-	free(buff);
-	return (left_str);
+	return (1);
+}
+
+char	*getstr(int fd, char *str)
+{
+	int		a;
+	char	*buffer;
+	char	*s;
+
+	if (!str)
+		str = ft_strdup("");
+	a = 1;
+	buffer = malloc(BUFFER_SIZE + 1);
+	if (!buffer)
+		return (NULL);
+	while ((a != 0) && !(ft_strchr(str, '\n')))
+	{
+		a = read(fd, buffer, BUFFER_SIZE);
+		if (a == 0)
+			break ;
+		if (!check_error(a, str, buffer))
+			return (NULL);
+		buffer[a] = '\0';
+		s = ft_strjoin(str, buffer);
+		free(str);
+		str = s;
+	}
+	free(buffer);
+	return (str);
+}
+
+char	*getnewline(char *str)
+{
+	char	*ptr;
+	int		len;
+
+	if (!str)
+		return (NULL);
+	if (!*str)
+		return (NULL);
+	ptr = ft_strchr(str, '\n');
+	if (!ptr)
+		return (ft_strdup(str));
+	ptr++;
+	if (!*ptr)
+		return (ft_strdup(str));
+	len = ft_strlen(str) - ft_strlen(ptr);
+	return (ft_substr(str, 0, len));
+}
+
+char	*getremain(char *str)
+{
+	char	*ptr;
+
+	ptr = ft_strchr(str, '\n');
+	if (!ptr)
+	{
+		free(str);
+		return (NULL);
+	}
+	ptr++;
+	if (!(*ptr))
+	{
+		free(str);
+		return (NULL);
+	}
+	ptr = ft_strdup(ptr);
+	free (str);
+	return (ptr);
 }
 
 char	*get_next_line(int fd)
 {
+	static char	*str;
 	char		*line;
-	static char	*left_str;
 
-	if (fd < 0 || BUFFER_SIZE <= 0)
-		return (0);
-	left_str = ft_read_to_left_str(fd, left_str);
-	if (!left_str)
+	str = getstr(fd, str);
+	if (!str)
 		return (NULL);
-	line = ft_get_line(left_str);
-	left_str = ft_new_left_str(left_str);
+	line = getnewline(str);
+	str = getremain(str);
 	return (line);
 }
 
-int	main(void)
+#include <fcntl.h>
+#include <stdio.h>
+
+int   main(int ac, char **av)
 {
-	char	*line;
-	int		i;
-	int		fd1;
-    
-	fd1 = open("tests/test.txt",  O_RDONLY);
-	
-	i = 1;
+  int   fd;
+  char *c;
+  char	*map;
+  int	i;
+  int	j;
+  char	**data;
 
-    
+  j = 0;  
+  i = 0;
+  map = av[1];
 
-    while (i<6)
-    {
-        line = get_next_line(fd1);
-        printf("Satır [%d]: %s", i, line);
-        free(line);
-        i++;
-    }
-	
-	close(fd1);
-	return (0);
-
+	if (ac == 2)
+	{
+		fd = open(map, O_RDWR);
+		c = get_next_line(fd);
+		// printf("%s", c);
+		// c = get_next_line(c);
+		// printf("%s", c);
+		// while(c)
+		// {
+		// 	i++;
+		// 	c = get_next_line(fd);
+		// 	i = ft_strlen(c);
+		// }
+		data = &c;
+		printf("%s", data[1]);
+		while (c)
+		{
+			c = get_next_line(fd);
+			i++;
+		}
+		printf("%s", c);
+		data = &c;
+		
+		printf("%s", data[0]);
+		
+		
+		//printf("%d", i);
+		printf("%d", i);
+		//system("leaks a.out");
+	}
 }
